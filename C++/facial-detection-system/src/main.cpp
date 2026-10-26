@@ -1,6 +1,8 @@
 #include <iostream>
 #include <opencv2/opencv.hpp>
 #include <vector>
+#include <chrono>
+
 
 
 int main()
@@ -28,6 +30,9 @@ int main()
     cv::Mat frame; // Create a matrix to hold the captured frame
     cv::Mat grayFrame; // Create a matrix to hold the grayscale version of the frame
 
+    auto previousTime = std::chrono::steady_clock::now();
+    int frameCount = 0;
+    double fps = 0.0;
     //--- INITIALIZE VIDEOCAPTURE ---//
 
     while (true) {
@@ -39,7 +44,7 @@ int main()
         }
 
         cv::cvtColor(frame, grayFrame, cv::COLOR_BGR2GRAY); // Convert the captured frame to grayscale
-        cv::equalizeHist(grayFrame, grayFrame);         // Equalize the histogram of the grayscale image to improve contrast 
+        cv::equalizeHist(grayFrame, grayFrame);             // Equalize the histogram of the grayscale image to improve contrast 
 
         std::vector<cv::Rect> faces; // Create a vector to hold the detected faces
 
@@ -52,6 +57,26 @@ int main()
             cv::Size(30, 30) // Minimum size of the detected faces
         );
 
+        frameCount++;
+
+        auto currentTime = std::chrono::steady_clock::now();
+        double elapsedSeconds =
+            std::chrono::duration<double>(currentTime - previousTime).count();
+
+        if (elapsedSeconds >= 1.0) {
+            fps = frameCount / elapsedSeconds;
+            frameCount = 0;
+            previousTime = currentTime;
+        }
+        cv::putText(
+            frame,
+            "FPS: " + std::to_string(static_cast<int>(fps)),
+            cv::Point(20, 80),
+            cv::FONT_HERSHEY_SIMPLEX,
+            1.0,
+            cv::Scalar(0, 255, 0),
+            2
+        );
         for (const cv::Rect& face : faces) { // Iterate through the detected faces and draw rectangles around them
             cv::rectangle(              // Draw a rectangle around the detected face
                 frame,                  // Input image (original frame)
