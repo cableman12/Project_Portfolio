@@ -68,6 +68,7 @@ int main()
             frameCount = 0;
             previousTime = currentTime;
         }
+
         cv::putText(
             frame,
             "FPS: " + std::to_string(static_cast<int>(fps)),
@@ -77,6 +78,7 @@ int main()
             cv::Scalar(0, 255, 0),
             2
         );
+        
         for (const cv::Rect& face : faces) { // Iterate through the detected faces and draw rectangles around them
             cv::rectangle(              // Draw a rectangle around the detected face
                 frame,                  // Input image (original frame)
